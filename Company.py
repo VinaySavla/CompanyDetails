@@ -13,7 +13,7 @@ import pandas as pd
 import time
 
 
-
+comapny_details = []
 def get_company_details(cin):
     res = requests.get(f"https://www.falconebiz.com/company/{cin}")
     soup = BeautifulSoup(res.text, "lxml")
@@ -81,7 +81,7 @@ def exl_read_write():
         print("Please Select Excel file first.")
         return
     
-    user_name = ""
+    # user_name = ""
     # getting the names and the cins
     l1 = []
 
@@ -109,12 +109,15 @@ def exl_read_write():
             print(cin)
 
             cd = get_company_details(cin)
-            print(
-                json.dumps(
-                    cd,
-                    indent=2,
-                )
-            )       
+            # print(
+            #     json.dumps(
+            #         cd,
+            #         indent=2,
+            #     )
+            # )
+            # print(col_value)
+            # print(df)
+            comapny_details.append(cd)  
             print("waiting "+ str(wait_time) +" seconds")
             time.sleep(int(wait_time))
             print("************************ cycle completed ************************")
@@ -130,6 +133,14 @@ def exl_read_write():
 
 
 exl_read_write()
+print(
+    json.dumps(
+        comapny_details,
+        indent=2,
+    ))
+df = pd.DataFrame(comapny_details)
+df.to_excel(exl_file_path)
+print("Process Completed")
 # cd = get_company_details("U55101DL2023PTC410401")
 # print(cd["Registration Number"])
 # print(
