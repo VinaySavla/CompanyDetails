@@ -10,6 +10,7 @@ from importlib.resources import path
 from sys import path_hooks
 import sys
 import pandas as pd
+import time
 
 
 
@@ -46,7 +47,10 @@ def get_company_details(cin):
 #end of Function
 
 exl_file_path=sys.argv[1]
-def exl_path():
+
+
+def exl_read_write():
+    wait_time = 3
     # exl_file_path=exl_file_path
     # print("Exl path Button")
     # files, _ = QFileDialog.getOpenFileName(None, "Open File", "", "PDF File (*.xlsx)")
@@ -54,29 +58,20 @@ def exl_path():
     # value = self.comboBox.currentText()
     # print(value)
 
-    print(exl_file_path)
+    # print(exl_file_path)
     
-    # if self.exl_file_path == "":
-    #     print("No excel file selected.")
-    #     return
 
-    # self.comboBox.clear()
     data = pd.read_excel(exl_file_path)
     
-    # all_columns = data.columns
-    # self.comboBox.setCurrentText("")
-    # self.lineEdit.setCurrentText
-    # for val in all_columns:
-        # self.comboBox.addItem(str(val))
     
     # self.lineEdit.setText(QFileDialog.getOpenFileName(None, "Open File", "Desktop", "Excel Workshee (*.xlsx)"))
     if exl_file_path !=None: 
-        print(exl_file_path)
+        # print(exl_file_path)
         data = pd.read_excel(exl_file_path)
         col_value=[]
         for name in data:
             col_value.append(name)
-            print(name)
+            # print(name)
         cin=""
         for i in col_value:
             if i=='Cin' or i=='cin' or i=='CIN':
@@ -85,6 +80,48 @@ def exl_path():
     else:
         print("Please Select Excel file first.")
         return
+    
+    user_name = ""
+    # getting the names and the cins
+    l1 = []
+
+    for index, row in data.iterrows():
+        l1.append(row.to_list())
+        
+
+    cins = data[cin]
+
+    #here
+    for i in range(len(cins)):
+        try:
+            # for every record get the name and the cin addresses
+            l2=[]
+            for j in l1[i]:
+                j=str(j)
+                if 'nan' in j or 'NaN' in j:
+                    j = "unknown"
+                l2.append(j)    
+
+            e = cins[i]
+            cin=str(e)
+            if 'nan' in cin or 'NaN' in cin:
+                cin = "unknown"
+            print(cin)
+
+            cd = get_company_details(cin)
+            print(
+                json.dumps(
+                    cd,
+                    indent=2,
+                )
+            )       
+            print("waiting "+ str(wait_time) +" seconds")
+            time.sleep(int(wait_time))
+            print("************************ cycle completed ************************")
+
+        except Exception as e:
+            print(e)    
+    
 #End of Exl Path
 
 
@@ -92,9 +129,9 @@ def exl_path():
 
 
 
-cd = get_company_details("U55101DL2023PTC410401")
-exl_path()
-print(cd["Registration Number"])
+exl_read_write()
+# cd = get_company_details("U55101DL2023PTC410401")
+# print(cd["Registration Number"])
 # print(
 #     json.dumps(
 #         get_company_details("U55101DL2023PTC410401"),
