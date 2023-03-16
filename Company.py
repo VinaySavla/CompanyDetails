@@ -8,6 +8,8 @@ from PyQt6.QtWidgets import QMessageBox
 
 from importlib.resources import path
 from sys import path_hooks
+import sys
+import pandas as pd
 
 
 
@@ -43,8 +45,55 @@ def get_company_details(cin):
     return result
 #end of Function
 
+exl_file_path=sys.argv[1]
+def exl_path():
+    # exl_file_path=exl_file_path
+    # print("Exl path Button")
+    # files, _ = QFileDialog.getOpenFileName(None, "Open File", "", "PDF File (*.xlsx)")
+    # self.exl_file_path = str(files)
+    # value = self.comboBox.currentText()
+    # print(value)
+
+    print(exl_file_path)
+    
+    # if self.exl_file_path == "":
+    #     print("No excel file selected.")
+    #     return
+
+    # self.comboBox.clear()
+    data = pd.read_excel(exl_file_path)
+    
+    # all_columns = data.columns
+    # self.comboBox.setCurrentText("")
+    # self.lineEdit.setCurrentText
+    # for val in all_columns:
+        # self.comboBox.addItem(str(val))
+    
+    # self.lineEdit.setText(QFileDialog.getOpenFileName(None, "Open File", "Desktop", "Excel Workshee (*.xlsx)"))
+    if exl_file_path !=None: 
+        print(exl_file_path)
+        data = pd.read_excel(exl_file_path)
+        col_value=[]
+        for name in data:
+            col_value.append(name)
+            print(name)
+        cin=""
+        for i in col_value:
+            if i=='Cin' or i=='cin' or i=='CIN':
+                cin=i
+                # print(cin+"##"")
+    else:
+        print("Please Select Excel file first.")
+        return
+#End of Exl Path
+
+
+
+
+
 
 cd = get_company_details("U55101DL2023PTC410401")
+exl_path()
 print(cd["Registration Number"])
 # print(
 #     json.dumps(
