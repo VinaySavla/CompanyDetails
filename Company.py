@@ -32,7 +32,7 @@ def get_company_details(cin):
     capital = tables[-1]
 
     # result = {}
-    result = {'comapany Name' : c_name}
+    result = {'Comapany Name' : c_name}
     # print(result)
     for table in (info, contact):
         for row in table.findAll('tr'):
