@@ -19,13 +19,21 @@ def get_company_details(cin):
     soup = BeautifulSoup(res.text, "lxml")
     tables = soup.find_all("table")
 
+    # TODO Comapany Name in Disctionary
+    # c_name = soup.get('li',attrs={'class':'breadcrumb-item active'})
+    c_name = soup.find(class_='breadcrumb-item active')
+    c_name=c_name.get_text()
+    # print(c_name)
+
     #info, contact, directors, capital = tables
     info = tables[0]
     contact = tables[-3]
     directors = tables[-2]
     capital = tables[-1]
 
-    result = {}
+    # result = {}
+    result = {'comapany Name' : c_name}
+    # print(result)
     for table in (info, contact):
         for row in table.findAll('tr'):
             aux = row.findAll('td')
@@ -50,7 +58,7 @@ exl_file_path=sys.argv[1]
 
 
 def exl_read_write():
-    wait_time = 3
+    wait_time = 1
     # exl_file_path=exl_file_path
     # print("Exl path Button")
     # files, _ = QFileDialog.getOpenFileName(None, "Open File", "", "PDF File (*.xlsx)")
@@ -133,13 +141,13 @@ def exl_read_write():
 
 
 exl_read_write()
-print(
-    json.dumps(
-        comapny_details,
-        indent=2,
-    ))
+# print(
+#     json.dumps(
+#         comapny_details,
+#         indent=2,
+#     ))
 df = pd.DataFrame(comapny_details)
-df.to_excel(exl_file_path)
+df.to_excel(exl_file_path+" Result.xlsx")
 print("Process Completed")
 # cd = get_company_details("U55101DL2023PTC410401")
 # print(cd["Registration Number"])
