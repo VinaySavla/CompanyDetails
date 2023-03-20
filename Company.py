@@ -24,7 +24,8 @@ class Ui_MainWindow(object):
         self.button_color_value = btn_val
         self.button_color = "background-color: rgb%s;color: rgb%s"%(self.button_color_value,self.send_button_text_color)
         
-        MainWindow.resize(562, 600)
+        # MainWindow.resize(562, 600)
+        MainWindow.setGeometry(500,100,500,500)
         MainWindow.setWindowTitle(main_window_title)
         MainWindow.setWindowIcon(QtGui.QIcon(main_icon))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
@@ -44,20 +45,20 @@ class Ui_MainWindow(object):
 
         #Send Button
         self.pushButton = QtWidgets.QPushButton(self.frame)
-        self.pushButton.setGeometry(QtCore.QRect(240, 470, 121, 51))
+        self.pushButton.setGeometry(QtCore.QRect(185, 350, 120, 50))
         self.pushButton.setStyleSheet(self.button_color)
         self.pushButton.setObjectName("pushButton")
 
         #Excel Button
         self.toolButton = QtWidgets.QToolButton(self.frame)
-        self.toolButton.setGeometry(QtCore.QRect(330, 110, 61, 31))
+        self.toolButton.setGeometry(QtCore.QRect(330, 200, 61, 31))
         self.toolButton.setObjectName("toolButton")
         self.toolButton.clicked.connect(self.exl_path)
         self.toolButton.setStyleSheet(self.all_text_color_browse)
 
         #Excel Lable
         self.label = QtWidgets.QLabel(self.frame)
-        self.label.setGeometry(QtCore.QRect(80, 110, 141, 31))
+        self.label.setGeometry(QtCore.QRect(80, 200, 141, 31))
         font = QtGui.QFont()
         font.setFamily("MS Shell Dlg 2")
         font.setPointSize(13)
@@ -82,7 +83,7 @@ class Ui_MainWindow(object):
 
         #Settings
         self.pushButton_2 = QtWidgets.QPushButton(self.frame)
-        self.pushButton_2.setGeometry(QtCore.QRect(5, 540, 30, 30))
+        self.pushButton_2.setGeometry(QtCore.QRect(5, 440, 30, 30))
         self.pushButton_2.setText("")
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("settings.png"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
@@ -157,9 +158,17 @@ class Ui_MainWindow(object):
 
         # self.lineEdit.setText(QFileDialog.getOpenFileName(None, "Open File", "Desktop", "Excel Workshee (*.xlsx)"))
 
-    def Pop_up_message(self,msg_text):
+    def Pop_up_message(self,msg_text,icon="Warning"):
         msg = QMessageBox()
         msg.setWindowTitle("Alert!")
+        if(icon=="Success"):
+            msg.setWindowIcon(QtGui.QIcon('check.png'))
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setIconPixmap(QtGui.QPixmap('check.png').scaled(20, 20))
+        else:
+            msg.setWindowIcon(QtGui.QIcon('warning.png'))
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setIconPixmap(QtGui.QPixmap('warning.png').scaled(20, 20))
         msg.setText(msg_text)
         x = msg.exec()  # this will show our messagebox
         
@@ -272,7 +281,7 @@ class Ui_MainWindow(object):
         #         comapny_details,
         #         indent=2,
         #     ))
-        df = pd.DataFrame(comapny_details)
+        # df = pd.DataFrame(comapny_details)
         newFileName=exl_file_path.rsplit('.')[0]+" Result.xlsx"
         # print(newFileName)
         df.to_excel(newFileName)
@@ -295,6 +304,8 @@ class Ui_MainWindow(object):
 
         #all variables reset
         self.exl_file_path = None
+
+        self.Pop_up_message("Excel with all Details Generated Successfully!","Success")
 
         print("Process completed.")
 
