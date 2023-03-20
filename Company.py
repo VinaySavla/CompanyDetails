@@ -258,6 +258,10 @@ class Ui_MainWindow(object):
                     print(cin)
 
                     cd = get_company_details(cin)
+                    for i, director in enumerate(cd["directors"]):
+                        for key, value in director.items():
+                            cd[key + "_" + str(i)] = value
+                    del cd["directors"]
                     # print(
                     #     json.dumps(
                     #         cd,
@@ -281,7 +285,7 @@ class Ui_MainWindow(object):
         #         comapny_details,
         #         indent=2,
         #     ))
-        # df = pd.DataFrame(comapny_details)
+        df = pd.DataFrame(comapny_details)
         newFileName=exl_file_path.rsplit('.')[0]+" Result.xlsx"
         # print(newFileName)
         df.to_excel(newFileName)
