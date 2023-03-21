@@ -203,7 +203,8 @@ class Ui_MainWindow(object):
 
             result["directors"] = [
                 {
-                    cell["data-label"]: cell.string
+                    # cell["data-label"]: cell.string
+                    cell["data-label"]: cell.getText()
                     for cell in record.findAll('td')
                 }
                 for record in directors.find("tbody").findAll("tr")
@@ -264,12 +265,12 @@ class Ui_MainWindow(object):
                         for key, value in director.items():
                             cd[key + "_" + str(i+1)] = value
                     del cd["directors"]
-                    print(
-                        json.dumps(
-                            cd,
-                            indent=2,
-                        )
-                    )
+                    # print(
+                    #     json.dumps(
+                    #         cd,
+                    #         indent=2,
+                    #     )
+                    # )
                     # print(col_value)
                     # print(df)
                     comapny_details.append(cd)  
@@ -311,9 +312,9 @@ class Ui_MainWindow(object):
         #all variables reset
         self.exl_file_path = None
 
-        self.Pop_up_message("Excel with all Details Generated Successfully!","Success")
 
         print("Process completed.")
+        self.Pop_up_message("Excel with all Details Generated Successfully!","Success")
 
 if __name__ == "__main__":
     import sys
