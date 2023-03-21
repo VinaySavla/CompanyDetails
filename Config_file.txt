@@ -4,4 +4,4 @@ start_button_color=(0, 255, 0)
 all_text_color=(0,0,0)
 start_button_text_color=(0, 0, 0)
 wait_time_in_sec=1
-Icon_path=sc_t.png
+Icon_path=UniqueSolutions.png
