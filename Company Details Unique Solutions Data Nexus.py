@@ -11,6 +11,7 @@ import pandas as pd
 import time
 from importlib.resources import path
 from sys import path_hooks
+from datetime import datetime
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow,btn_val,gb_val,title,all_text_color,Start_button_text_color,wait_time,main_icon):
@@ -289,7 +290,8 @@ class Ui_MainWindow(object):
         #         indent=2,
         #     ))
         df = pd.DataFrame(comapny_details)
-        newFileName=exl_file_path.rsplit('.')[0]+" Result.xlsx"
+        date = datetime.today().strftime("%d%m%Y%H%M%S")
+        newFileName=exl_file_path.rsplit('.')[0]+date+".xlsx"
         # print(newFileName)
         df.to_excel(newFileName)
         # cd = get_company_details("U55101DL2023PTC410401")
