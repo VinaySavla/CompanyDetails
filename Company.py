@@ -197,7 +197,9 @@ class Ui_MainWindow(object):
             for table in (info, contact):
                 for row in table.findAll('tr'):
                     aux = row.findAll('td')
-                    result[aux[0].string] = str(aux[1].string).strip()
+                    # print(str(aux[1].getText()))
+                    result[aux[0].string] = str(aux[1].getText())
+                    # result[aux[0].string] = str(aux[1].string).strip()
 
             result["directors"] = [
                 {
@@ -262,12 +264,12 @@ class Ui_MainWindow(object):
                         for key, value in director.items():
                             cd[key + "_" + str(i)] = value
                     del cd["directors"]
-                    # print(
-                    #     json.dumps(
-                    #         cd,
-                    #         indent=2,
-                    #     )
-                    # )
+                    print(
+                        json.dumps(
+                            cd,
+                            indent=2,
+                        )
+                    )
                     # print(col_value)
                     # print(df)
                     comapny_details.append(cd)  
