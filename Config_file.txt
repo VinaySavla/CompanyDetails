@@ -1,8 +1,7 @@
-title=SC LEGAL
+title=Unique Solutions - Data Nexus
 background_color=(17, 200, 255)
-send_button_color=(0, 255, 0)
+start_button_color=(0, 255, 0)
 all_text_color=(0,0,0)
-send_button_text_color=(0, 0, 0)
+start_button_text_color=(0, 0, 0)
 wait_time_in_sec=1
-Main_Window_title=SC LEGAL
 Icon_path=sc_t.png

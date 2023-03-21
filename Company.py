@@ -13,20 +13,20 @@ from importlib.resources import path
 from sys import path_hooks
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow,btn_val,gb_val,title_name,all_text_color,send_button_text_color,wait_time,main_window_title,main_icon):
+    def setupUi(self, MainWindow,btn_val,gb_val,title,all_text_color,Start_button_text_color,wait_time,main_icon):
         self.all_text_color_val=all_text_color
         self.all_text_color="font: 75 13pt \"MS Shell Dlg 2\";color:rgb%s;"%(self.all_text_color_val)
         self.all_text_color_browse="color:rgb%s;"%(self.all_text_color_val)
-        self.send_button_text_color = send_button_text_color
+        self.Start_button_text_color = Start_button_text_color
         self.wait_time = wait_time
         self.background_color_value = gb_val
         self.background_color = "background-color: rgb%s;"%(self.background_color_value)
         self.button_color_value = btn_val
-        self.button_color = "background-color: rgb%s;color: rgb%s"%(self.button_color_value,self.send_button_text_color)
+        self.button_color = "background-color: rgb%s;color: rgb%s"%(self.button_color_value,self.Start_button_text_color)
         
         # MainWindow.resize(562, 600)
         MainWindow.setGeometry(500,100,500,500)
-        MainWindow.setWindowTitle(main_window_title)
+        MainWindow.setWindowTitle(title)
         MainWindow.setWindowIcon(QtGui.QIcon(main_icon))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
 
@@ -72,8 +72,8 @@ class Ui_MainWindow(object):
         #Title
         self.label_4 = QtWidgets.QLabel(self.frame)
         self.label_4.setStyleSheet(self.all_text_color)
-        self.label_4.setText(title_name)
-        self.label_4.setGeometry(QtCore.QRect(220, 20, 241, 61))
+        self.label_4.setText(title)
+        self.label_4.setGeometry(QtCore.QRect(150, 20, 241, 61))
         font = QtGui.QFont()
         font.setPointSize(12)
         font.setBold(True)
@@ -98,7 +98,7 @@ class Ui_MainWindow(object):
         
         #Logo
         self.label_8 = QtWidgets.QLabel(self.frame)
-        self.label_8.setGeometry(QtCore.QRect(120, 20, 91, 61))
+        self.label_8.setGeometry(QtCore.QRect(50, 20, 91, 61))
         self.label_8.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.SizeBDiagCursor))
         self.label_8.setText("")
         self.label_8.setPixmap(QtGui.QPixmap(main_icon))
@@ -121,8 +121,8 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Select Excel Sheet"))
         self.toolButton.setText(_translate("MainWindow", "Browse"))
 
-        self.pushButton.setText(_translate("MainWindow", "Send"))
-        self.pushButton.clicked.connect(self.Send_button)
+        self.pushButton.setText(_translate("MainWindow", "Start"))
+        self.pushButton.clicked.connect(self.Start_button)
         
 
     def ChangeSettings(self):
@@ -301,7 +301,7 @@ class Ui_MainWindow(object):
         #     )
         # )
 
-    def Send_button(self):
+    def Start_button(self):
 
         if self.exl_file_path==None:
             self.Pop_up_message("Please Select Excel File")
@@ -324,8 +324,8 @@ if __name__ == "__main__":
     with open('Config_file.txt') as f:
         lines = f.readlines()
     
-    title_name=lines[0].strip()
-    title_name = title_name.split("=")[1]
+    title=lines[0].strip()
+    title = title.split("=")[1]
 
     bg_color_set=lines[1].strip()
     bg_color_set = bg_color_set.split("=")[1]
@@ -336,22 +336,19 @@ if __name__ == "__main__":
     all_text_color=lines[3].strip()
     all_text_color=all_text_color.split("=")[1]
 
-    send_button_text_color=lines[4].strip()
-    send_button_text_color=send_button_text_color.split("=")[1]
+    Start_button_text_color=lines[4].strip()
+    Start_button_text_color=Start_button_text_color.split("=")[1]
 
     wait_time_in_sec=lines[5].strip()
     wait_time_in_sec=wait_time_in_sec.split("=")[1]
 
-    main_window_title=lines[6].strip()
-    main_window_title=main_window_title.split("=")[1]
-
-    main_icon=lines[7].strip()
+    main_icon=lines[6].strip()
     main_icon=main_icon.split("=")[1]
 
     myLabel= QLabel()
     myLabel.setAutoFillBackground(True) # This is important!!
     
 
-    ui.setupUi(MainWindow,btn_color_set,bg_color_set,title_name,all_text_color,send_button_text_color,wait_time_in_sec,main_window_title,main_icon)
+    ui.setupUi(MainWindow,btn_color_set,bg_color_set,title,all_text_color,Start_button_text_color,wait_time_in_sec,main_icon)
     MainWindow.show()
     sys.exit(app.exec())
