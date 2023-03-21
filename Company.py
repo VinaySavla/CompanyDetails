@@ -262,7 +262,7 @@ class Ui_MainWindow(object):
                     cd = get_company_details(cin)
                     for i, director in enumerate(cd["directors"]):
                         for key, value in director.items():
-                            cd[key + "_" + str(i)] = value
+                            cd[key + "_" + str(i+1)] = value
                     del cd["directors"]
                     print(
                         json.dumps(
