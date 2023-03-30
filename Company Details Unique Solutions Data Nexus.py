@@ -12,9 +12,11 @@ import time
 from importlib.resources import path
 from sys import path_hooks
 from datetime import datetime
+import re
+import warnings
 
 class Ui_MainWindow(object):
-    def setupUi(self, MainWindow,btn_val,gb_val,title,all_text_color,Start_button_text_color,wait_time,main_icon):
+    def setupUi(self, MainWindow,btn_val,gb_val,title,all_text_color,Start_button_text_color,wait_time,main_icon,retry_sleep,retry_limit):
         self.all_text_color_val=all_text_color
         self.all_text_color="font: 75 13pt \"MS Shell Dlg 2\";color:rgb%s;"%(self.all_text_color_val)
         self.all_text_color_browse="color:rgb%s;"%(self.all_text_color_val)
@@ -24,6 +26,8 @@ class Ui_MainWindow(object):
         self.background_color = "background-color: rgb%s;"%(self.background_color_value)
         self.button_color_value = btn_val
         self.button_color = "background-color: rgb%s;color: rgb%s"%(self.button_color_value,self.Start_button_text_color)
+        self.retry_sleep=retry_sleep
+        self.retry_limit=retry_limit
         
         # MainWindow.resize(562, 600)
         MainWindow.setGeometry(500,100,500,500)
@@ -175,10 +179,43 @@ class Ui_MainWindow(object):
         
     def getDetails(self):
         comapny_details = []
+        def get_company_details_with_retry(cin, sleep=retry_sleep, limit=retry_limit):
+            tries = 0
+
+            while tries < int(limit):
+                tries += 1
+                try:
+                    return get_company_details(cin)
+                except Exception as e:
+                    print(e)
+                    print("Retrying in "+sleep+" Seconds...")
+                    time.sleep(int(sleep))
+                    print("Retrying...")
+            
+            return None
+
         def get_company_details(cin):
-            res = requests.get(f"https://www.falconebiz.com/company/{cin}")
+            s = requests.Session()
+
+            isllp = len(cin) <= 10
+            if (isllp):
+                url = 'https://www.falconebiz.com/mca_api/update_company.php'
+                data = {'llpin': cin}
+                response = requests.post(url, data=data)
+                print(response.text)
+                time.sleep(1)
+                res = s.get(f"https://www.falconebiz.com/LLP/{cin}")
+            else:
+                url = 'https://www.falconebiz.com/mca_api/update_company.php'
+                data = {'cin': cin}
+                response = requests.post(url, data=data)
+                print(response.text)
+                time.sleep(1)
+                res = s.get(f"https://www.falconebiz.com/company/{cin}")
             soup = BeautifulSoup(res.text, "lxml")
             tables = soup.find_all("table")
+            # print(len(tables))
+            # print(tables)
 
             # TODO Comapany Name in Disctionary
             # c_name = soup.get('li',attrs={'class':'breadcrumb-item active'})
@@ -186,11 +223,18 @@ class Ui_MainWindow(object):
             c_name=c_name.get_text()
             # print(c_name)
 
-            #info, contact, directors, capital = tables
-            info = tables[0]
-            contact = tables[-3]
-            directors = tables[-2]
-            capital = tables[-1]
+            if isllp:
+                info = soup.find(text=re.compile('LLP INFORMATION'), name="h3").parent.parent.find_next("table")
+                contact = soup.find(text=re.compile('CONTACT DETAILS'), name="h3").parent.parent.parent.find_next("table")
+                directors = soup.find(text=re.compile('PARTNERS'), name="h3").parent.parent.find_next("table")
+                stats = soup.find(text=re.compile('LLP STATS'), name="h3").parent.parent.find_next("table")
+            else:
+                info = soup.find(text=re.compile('COMPANY INFORMATION'), name="h3").parent.parent.find_next("table")
+                contact = soup.find(text=re.compile('CONTACT DETAILS'), name="h3").parent.parent.parent.find_next("table")
+                directors = soup.find(text=re.compile('DIRECTORS'), name="h3").parent.parent.find_next("table")
+                stats = soup.find(text=re.compile('COMPANY STATS'), name="h3").parent.parent.find_next("table")
+
+            # print(info+"\n"+contact+"\n"+directors)
 
             # result = {}
             result = {'Comapany Name' : c_name}
@@ -198,30 +242,48 @@ class Ui_MainWindow(object):
             for table in (info, contact):
                 for row in table.findAll('tr'):
                     aux = row.findAll('td')
+                    # print(aux)
                     # print(str(aux[1].getText()))
                     result[aux[0].string] = str(aux[1].getText())
                     # result[aux[0].string] = str(aux[1].string).strip()
 
-            result["directors"] = [
-                {
-                    # cell["data-label"]: cell.string
-                    cell["data-label"]: cell.getText()
-                    for cell in record.findAll('td')
-                }
-                for record in directors.find("tbody").findAll("tr")
-            ]
+            # result["directors"] = [
+            #     {
+            #         # cell["data-label"]: cell.string
+            #         cell["data-label"]: cell.getText()
+            #         for cell in record.findAll('td')
+            #     }
+            #     for record in directors.find("tbody").findAll("tr")
+            # ]
+            directorsList = []
+            for record in directors.find("tbody").findAll("tr"):
+                director = {}
+                for cell in record.findAll('td'):
+                    if "data-label" in cell.attrs:
+                        director[cell["data-label"]] = cell.getText()
+                    else:
+                        director["DIN"] = "N/A"
+                        director["Name"] = "N/A"
+                        director["Designation"] = "N/A"
+                        director["Appointment"] = "N/A"
+                        break
+                
+                directorsList.append(director)
+            result["directors"] = directorsList
 
-            for row in capital.findAll('tr'):
+            for row in stats.findAll('tr'):
                 aux = list(row.find('td').stripped_strings)
                 result[aux[0]] = ' '.join(aux[1:])
 
             return result
-        #end of Function
+            #end of Function
 
         exl_file_path=self.exl_file_path
 
 
         def exl_read_write():
+            date = datetime.today().strftime("%d%m%Y%H%M%S")
+            newFileName=exl_file_path.rsplit('.')[0]+" "+date+".xlsx"
             wait_time = self.wait_time
             data = pd.read_excel(exl_file_path)
             if exl_file_path !=None: 
@@ -232,7 +294,8 @@ class Ui_MainWindow(object):
                     # print(name)
                 cin=""
                 for i in col_value:
-                    if i=='Cin' or i=='cin' or i=='CIN':
+                    if str(i).lower()=='cin' or str(i).lower()=='llpin':
+                    # if i=='Cin' or i=='cin' or i=='CIN':
                         cin=i
                         # print(cin+"##"")
             else:
@@ -261,7 +324,8 @@ class Ui_MainWindow(object):
                         cin = "unknown"
                     print(cin)
 
-                    cd = get_company_details(cin)
+                    # cd = get_company_details(cin)
+                    cd = get_company_details_with_retry(cin)
                     for i, director in enumerate(cd["directors"]):
                         for key, value in director.items():
                             cd[key + "_" + str(i+1)] = value
@@ -274,7 +338,9 @@ class Ui_MainWindow(object):
                     # )
                     # print(col_value)
                     # print(df)
-                    comapny_details.append(cd)  
+                    comapny_details.append(cd) 
+                    df = pd.DataFrame(comapny_details) 
+                    df.to_excel(newFileName)
                     print("waiting "+ str(wait_time) +" seconds")
                     time.sleep(int(wait_time))
                     print("************************ cycle completed ************************")
@@ -283,17 +349,20 @@ class Ui_MainWindow(object):
                     print(e)    
             
         #End of Exl Path
-        exl_read_write()
+        with warnings.catch_warnings():
+            # Suppress the DeprecationWarning for the 'text' argument in the find() method
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            exl_read_write()
         # print(
         #     json.dumps(
         #         comapny_details,
         #         indent=2,
         #     ))
-        df = pd.DataFrame(comapny_details)
-        date = datetime.today().strftime("%d%m%Y%H%M%S")
-        newFileName=exl_file_path.rsplit('.')[0]+date+".xlsx"
-        # print(newFileName)
-        df.to_excel(newFileName)
+        # df = pd.DataFrame(comapny_details)
+        # date = datetime.today().strftime("%d%m%Y%H%M%S")
+        # newFileName=exl_file_path.rsplit('.')[0]+" "+date+".xlsx"
+        # # print(newFileName)
+        # df.to_excel(newFileName)
         # cd = get_company_details("U55101DL2023PTC410401")
         # print(cd["Registration Number"])
         # print(
@@ -346,11 +415,17 @@ if __name__ == "__main__":
 
     main_icon=lines[6].strip()
     main_icon=main_icon.split("=")[1]
+    
+    retry_sleep=lines[7].strip()
+    retry_sleep=retry_sleep.split("=")[1]
+    
+    retry_limit=lines[8].strip()
+    retry_limit=retry_limit.split("=")[1]
 
     myLabel= QLabel()
     myLabel.setAutoFillBackground(True) # This is important!!
     
 
-    ui.setupUi(MainWindow,btn_color_set,bg_color_set,title,all_text_color,Start_button_text_color,wait_time_in_sec,main_icon)
+    ui.setupUi(MainWindow,btn_color_set,bg_color_set,title,all_text_color,Start_button_text_color,wait_time_in_sec,main_icon,retry_sleep,retry_limit)
     MainWindow.show()
     sys.exit(app.exec())
